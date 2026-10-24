@@ -1,0 +1,15 @@
+# Entornos virtuales
+tp5_env/
+tp5_laboratorio/
+venv/
+env/
+.env/
+
+# Caché de Python
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Configuración del sistema o del editor
+.vscode/
+.DS_Store
