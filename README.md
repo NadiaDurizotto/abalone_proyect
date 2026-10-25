@@ -30,13 +30,15 @@ Asegurate de tener tu entorno de Conda activo con las librerías necesarias (req
    Ejecutar el archivo 'preprocess.py'. Este toma los datos crudos del csv 'abalone_raw.csv' y crea 'abalone_clean.csv' con los datos ya procesados.
 2. ### Modelado y Entrenamiento
    Ejecutar `python src/train_model.py` desde la raíz del proyecto. El script entrena los modelos y permite realizar la optimización de hiperparámetros mediante Optuna.
-
    - El modelo base (Random Forest) genera el modelo comprimido `models/model_v1.pkl`, las métricas en `results/metrics_v1.json` y el registro en `results/experiments_log.csv`.
-   - La variante con Regresión Lineal optimizada con Optuna genera `models/model_v2_linear_optuna.pkl`, guardando sus métricas y el experimento correspondiente.
+   - La variante con KNN optimizada con Optuna genera `models/model_v3.pkl`, las métricas en 'metrics_v3.json' y el registro en `results/experiments_log.csv`.
+   - La variante con Regresión Lineal optimizada con Optuna genera `models/model_v2_linear_optuna.pkl`, las métricas en 'metrics_v2_linear_optuna.json' y el registro en `results/experiments_log.csv`.
 
 
 ## Resultados
    - **Experimento exp_optuna_v2 (model_v2):** Optimización de hiperparámetros con Optuna. 
    Métricas obtenidas: R² = [0.53], MAE = [1.52], RMSE = [2.16].
+   - **Experimento exp_003 (model_v3):** Optimización de hiperparámetros con Optuna (KNN + RobustScaler). 
+   Métricas obtenidas: R² = [0.52], MAE = [1.54], RMSE = [2.20].
    - **Experimento exp_optuna_v4 (model_v4):** Optimización de hiperparámetros con Optuna. 
    Métricas obtenidas: R² = [0.52], MAE = [1.58], RMSE = [2.18].
