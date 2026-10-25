@@ -1,0 +1,12 @@
+{
+    "random_state": 42,
+    "hyperparameters": {
+        "n_estimators": 191,
+        "max_depth": 8
+    },
+    "metrics": {
+        "MAE": 1.5225362194630292,
+        "RMSE": 2.1689983582926904,
+        "R2": 0.5367051769596838
+    }
+}

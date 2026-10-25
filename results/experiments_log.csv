@@ -1,0 +1,2 @@
+experiment_id,timestamp,model_version,n_estimators,max_depth,random_state,MAE,RMSE,R2
+exp_001,2026-10-25 02:41:15,model_v1,191,8,42,1.5225362194630292,2.1689983582926904,0.5367051769596838
