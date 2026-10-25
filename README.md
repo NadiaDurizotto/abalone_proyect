@@ -1,13 +1,38 @@
-# Predicción con el Dataset Abalone
+# Abalone Dataset
+Repositorio para el desarrollo del trabajo práctico de Laboratorio de Datos, enfocado en la utilizacion de git en la creacion de proyectos.
 
-## Descripción del Proyecto
-Este proyecto tiene como objetivo establecer un flujo de trabajo estandarizado de ciencia de datos utilizando control de versiones (Git), estructuración modular de código y gestión de entornos virtuales.
+## Estructura del Proyecto
+abalone_project/ 
+│ 
+├── data/ 
+│   
+├── raw/                  
+│    
+│ 
+├── processed/            
+└── data_log.json         
+├── src/ 
+│   
+├── preprocess.py         
+│   
+│ 
+└── train_model.py        
+├── results/ 
+│   
+├── metrics_v1.json       
+│   
+└── experiments_log.csv   # (Ejercicio 3) 
+│ 
+├── models/                   
+│ 
+├── .gitignore 
+├── requirements.txt 
+├── carga_dataset.py 
+└── README.md 
 
-## Requisitos y Reproducción del Entorno
-Para replicar el entorno de trabajo en tu máquina mediante Anaconda Prompt, seguí estos pasos:
+## Instrucciones para ejecutar el preprocesamiento
+Asegurate de tener tu entorno de Conda activo con las librerías necesarias (requirements.txt) e instalado en la raíz del proyecto.
 
-1. Clonar o descargar el repositorio.
-2. Crear el entorno virtual de Conda y activarlo:
-   ```bash
-   conda create --name tp5_laboratorio python=3.11 -y
-   conda activate tp5_laboratorio
+## Como usarlo
+1. ### Preprocesamiento
+   Ejecutar el archivo preprocess.py. Este toma los datos crudos del csv 'abalone_raw.csv' y crea ;abalone_clean.csv' con los datos ya procesados.
