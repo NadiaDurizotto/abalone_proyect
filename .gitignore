@@ -13,3 +13,6 @@ __pycache__/
 # Configuración del sistema o del editor
 .vscode/
 .DS_Store
+
+# Carga por primera vez del data set
+/carga_dataset.py
