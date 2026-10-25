@@ -1,0 +1,13 @@
+{
+    "random_state": 42,
+    "hyperparameters": {
+        "n_estimators": 294,
+        "max_depth": 9,
+        "min_samples_split": 9
+    },
+    "metrics": {
+        "MAE": 1.521266047985489,
+        "RMSE": 2.162667874159693,
+        "R2": 0.5394055944419092
+    }
+}
