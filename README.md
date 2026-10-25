@@ -29,9 +29,14 @@ Asegurate de tener tu entorno de Conda activo con las librerías necesarias (req
 1. ### Preprocesamiento
    Ejecutar el archivo 'preprocess.py'. Este toma los datos crudos del csv 'abalone_raw.csv' y crea 'abalone_clean.csv' con los datos ya procesados.
 2. ### Modelado y Entrenamiento
-   Ejecutar el archivo 'train_model.py'. Este toma los datos limpios de 'data/processed/abalone_clean.csv', entrena el modelo de regresión (RandomForest), y genera el modelo comprimido 'models/model_v1.pkl', las métricas en 'results/metrics_v1.json' y el registro de experimentos en 'results/experiments_log.csv'.
+   Ejecutar `python src/train_model.py` desde la raíz del proyecto. El script entrena los modelos y permite realizar la optimización de hiperparámetros mediante Optuna.
+
+   - El modelo base (Random Forest) genera el modelo comprimido `models/model_v1.pkl`, las métricas en `results/metrics_v1.json` y el registro en `results/experiments_log.csv`.
+   - La variante con Regresión Lineal optimizada con Optuna genera `models/model_v2_linear_optuna.pkl`, guardando sus métricas y el experimento correspondiente.
 
 
 ## Resultados
    - **Experimento exp_optuna_v2 (model_v2):** Optimización de hiperparámetros con Optuna. 
-   Métricas obtenidas: R² = [tu valor de R2], MAE = [tu valor de MAE], RMSE = [tu valor de RMSE].
+   Métricas obtenidas: R² = [0.53], MAE = [1.52], RMSE = [2.16].
+   - **Experimento exp_optuna_v4 (model_v4):** Optimización de hiperparámetros con Optuna. 
+   Métricas obtenidas: R² = [0.52], MAE = [1.58], RMSE = [2.18].
