@@ -1,8 +1,9 @@
 # Abalone Dataset
+
 Repositorio para el desarrollo del trabajo práctico de Laboratorio de Datos, enfocado en la utilizacion de git en la creacion de proyectos.
 
-
 ## Estructura del Proyecto
+
 abalone_project/
 ├── data/
 │   ├── raw/
@@ -22,17 +23,22 @@ abalone_project/
 
 
 ## Instrucciones para ejecutar el preprocesamiento
-Asegurate de tener tu entorno de Conda activo con las librerías necesarias (requirements.txt) e instalado en la raíz del proyecto.
 
+### Preparar el entorno
 
-## Como usarlo:
-1. ### Preprocesamiento
-   Ejecutar el archivo 'preprocess.py'. Este toma los datos crudos del csv 'abalone_raw.csv' y crea 'abalone_clean.csv' con los datos ya procesados.
-2. ### Modelado y Entrenamiento
-   Ejecutar `python src/train_model.py` desde la raíz del proyecto. El script entrena los modelos y permite realizar la optimización de hiperparámetros mediante Optuna.
-   - El modelo base (Random Forest) genera el modelo comprimido `models/model_v1.pkl`, las métricas en `results/metrics_v1.json` y el registro en `results/experiments_log.csv`.
-   - La variante con KNN optimizada con Optuna genera `models/model_v3.pkl`, las métricas en 'metrics_v3.json' y el registro en `results/experiments_log.csv`.
-   - La variante con Regresión Lineal optimizada con Optuna genera `models/model_v2_linear_optuna.pkl`, las métricas en 'metrics_v2_linear_optuna.json' y el registro en `results/experiments_log.csv`.
+Desde la raíz del proyecto, en Windows PowerShell:
+ conda create -n abalone python=3.11 pip -y
+conda activate abalone
+python -m pip install -r requirements.txt
+
+### Ejecutar el proyecto
+
+Ejecutá estos comandos desde la raíz del proyecto:
+python src/preprocess.py
+python src/train_model.py
+El preprocesamiento lee data/raw/abalone_raw.csv y genera data/processed/abalone_clean.csv.
+El entrenamiento genera los modelos y las métricas de las variantes incluidas en src/train_model.py. Los modelos se guardan en models/, las métricas en results/ y cada ejecución se agrega a results/experiments_log.csv.
+Al repetir el entrenamiento, los archivos de modelos y métricas pueden actualizarse, y se agrega una nueva fila al registro de experimentos.
 
 
 ## Resultados
