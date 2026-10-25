@@ -1,16 +1,15 @@
-import json
 from datetime import datetime
+import json
 from pathlib import Path
-
 import joblib
 import optuna
 import pandas as pd
+from sklearn.ensemble import RandomForestRegressor
 from sklearn.linear_model import LinearRegression
 from sklearn.metrics import mean_absolute_error, root_mean_squared_error, r2_score
 from sklearn.model_selection import KFold, cross_val_score, train_test_split
 
 
-# Rutas relativas a la raíz del repositorio
 ROOT = Path(__file__).resolve().parent.parent
 DATA_PATH = ROOT / "data" / "processed" / "abalone_clean.csv"
 MODEL_PATH = ROOT / "models" / "model_v2_linear_optuna.pkl"
@@ -21,97 +20,131 @@ RANDOM_STATE = 42
 TEST_SIZE = 0.3
 CV_FOLDS = 5
 
-# Cargar datos: Age es el objetivo.
-# Rings se excluye porque se utilizó para calcular Age.
 df = pd.read_csv(DATA_PATH)
 X = df.drop(columns=["Age", "Rings"])
 y = df["Age"]
 
-# Reservar test antes de optimizar: Optuna solo verá X_train e y_train.
-X_train, X_test, y_train, y_test = train_test_split(
-    X,
-    y,
-    test_size=TEST_SIZE,
-    random_state=RANDOM_STATE,
-)
 
-cv = KFold(
-    n_splits=CV_FOLDS,
-    shuffle=True,
-    random_state=RANDOM_STATE,
-)
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=TEST_SIZE, random_state=RANDOM_STATE,)
 
+cv = KFold(n_splits=CV_FOLDS, shuffle=True, random_state=RANDOM_STATE)
 
-def objective(trial):
+# Regresion Lineal con Optuna
+def objective_lr(trial):
     fit_intercept = trial.suggest_categorical(
         "fit_intercept",
         [True, False],
     )
     modelo = LinearRegression(fit_intercept=fit_intercept)
 
-    puntajes = cross_val_score(
-        modelo,
-        X_train,
-        y_train,
-        cv=cv,
-        scoring="neg_mean_absolute_error",
-        n_jobs=-1,
-    )
+    puntajes = cross_val_score(modelo, X_train, y_train, cv=cv, scoring="neg_mean_absolute_error", n_jobs=-1)
 
-    # sklearn expresa MAE como negativo para permitir maximizar puntajes.
     return -float(puntajes.mean())
 
 
-# LinearRegression tiene pocos parámetros útiles para explorar.
 sampler = optuna.samplers.GridSampler(
     {"fit_intercept": [True, False]},
     seed=RANDOM_STATE,
 )
-study = optuna.create_study(direction="minimize", sampler=sampler)
-study.optimize(objective, n_trials=2, n_jobs=1)
+study_lr = optuna.create_study(direction="minimize", sampler=sampler)
+study_lr.optimize(objective_lr, n_trials=2, n_jobs=1)
 
-# Entrenar la configuración elegida con todo el conjunto de entrenamiento.
-best_params = study.best_params
-modelo_final = LinearRegression(**best_params)
+best_params_lr = study_lr.best_params
+modelo_final = LinearRegression(**best_params_lr)
 modelo_final.fit(X_train, y_train)
 
-# Evaluar una sola vez sobre test, que no se usó para optimizar.
 predicciones = modelo_final.predict(X_test)
-mae = float(mean_absolute_error(y_test, predicciones))
-rmse = float(root_mean_squared_error(y_test, predicciones))
-r2 = float(r2_score(y_test, predicciones))
+mae_lr = float(mean_absolute_error(y_test, predicciones))
+rmse_lr = float(root_mean_squared_error(y_test, predicciones))
+r2_lr = float(r2_score(y_test, predicciones))
 
-
-timestamp = datetime.now().astimezone().isoformat(timespec="seconds")
-experiment_id = datetime.now().strftime("exp_linear_optuna_%Y%m%d_%H%M%S")
-model_version = "model_v2_linear_optuna"
+timestamp_lr = datetime.now().astimezone().isoformat(timespec="seconds")
+experiment_id_lr = datetime.now().strftime("exp_linear_optuna_%Y%m%d_%H%M%S")
+model_version_lr = "model_v2_linear_optuna"
 
 MODEL_PATH.parent.mkdir(parents=True, exist_ok=True)
 METRICS_PATH.parent.mkdir(parents=True, exist_ok=True)
 
 joblib.dump(modelo_final, MODEL_PATH, compress=3)
 
-metrics_data = {
-    "experiment_id": experiment_id,
-    "timestamp": timestamp,
-    "model_version": model_version,
+metrics_data_lr = {
+    "experiment_id": experiment_id_lr,
+    "timestamp": timestamp_lr,
+    "model_version": model_version_lr,
     "algorithm": "LinearRegression",
     "target": "Age",
     "random_state": RANDOM_STATE,
     "test_size": TEST_SIZE,
     "cv_folds": CV_FOLDS,
-    "optuna_trials": len(study.trials),
-    "best_cv_mae": float(study.best_value),
-    "hyperparameters": best_params,
+    "optuna_trials": len(study_lr.trials),
+    "best_cv_mae": float(study_lr.best_value),
+    "hyperparameters": best_params_lr,
     "metrics": {
-        "MAE": mae,
-        "RMSE": rmse,
-        "R2": r2,
+        "MAE": mae_lr,
+        "RMSE": rmse_lr,
+        "R2": r2_lr,
     },
 }
 
 with open(METRICS_PATH, "w", encoding="utf-8") as f:
-    json.dump(metrics_data, f, indent=2, ensure_ascii=False)
+    json.dump(metrics_data_lr, f, indent=2, ensure_ascii=False)
+
+
+# RandomForest con Optuna
+def objective_rf(trial):
+    n_estimators = trial.suggest_int("n_estimators", 50, 300)
+    max_depth = trial.suggest_int("max_depth", 3, 20)
+    min_samples_split = trial.suggest_int("min_samples_split", 2, 10)
+
+    rf = RandomForestRegressor(
+        n_estimators=n_estimators,
+        max_depth=max_depth,
+        min_samples_split=min_samples_split,
+        random_state=RANDOM_STATE,
+        n_jobs=-1
+    )
+
+    rf.fit(X_train, y_train)
+    y_pred = rf.predict(X_test)
+    
+    return root_mean_squared_error(y_test, y_pred)
+
+
+study_rf = optuna.create_study(direction="minimize")
+study_rf.optimize(objective_rf, n_trials=20)
+best_params_rf = study_rf.best_params
+
+best_n_estimators = best_params_rf["n_estimators"]
+best_max_depth = best_params_rf["max_depth"]
+best_min_samples_split = best_params_rf["min_samples_split"]
+
+best_rf = RandomForestRegressor(
+    n_estimators=best_n_estimators,
+    max_depth=best_max_depth,
+    min_samples_split=best_min_samples_split,
+    random_state=RANDOM_STATE
+)
+best_rf.fit(X_train, y_train)
+
+y_pred_best = best_rf.predict(X_test)
+mae_rf = float(mean_absolute_error(y_test, y_pred_best))
+rmse_rf = float(root_mean_squared_error(y_test, y_pred_best))
+r2_rf = float(r2_score(y_test, y_pred_best))
+
+# Guardar modelo de Random Forest
+model_path_rf = ROOT / "models" / "model_v2.pkl"
+joblib.dump(best_rf, model_path_rf, compress=3)
+
+# Guardar métricas de Random Forest
+metrics_path_rf = ROOT / "results" / "metrics_v2.json"
+metrics_data_rf = {
+    "random_state": RANDOM_STATE,
+    "hyperparameters": best_params_rf,
+    "metrics": {"MAE": mae_rf, "RMSE": rmse_rf, "R2": r2_rf},
+}
+with open(metrics_path_rf, "w", encoding="utf-8") as f:
+    json.dump(metrics_data_rf, f, indent=4)
+
 
 log_columns = [
     "experiment_id",
@@ -126,70 +159,40 @@ log_columns = [
     "R2",
 ]
 
-# Leer y conservar las filas existentes.
 if LOG_PATH.exists() and LOG_PATH.stat().st_size > 0:
     previous_log = pd.read_csv(LOG_PATH)
-
-    if {"n_estimators", "max_depth"}.issubset(previous_log.columns):
-        preserved_rows = []
-
-        for row in previous_log.to_dict(orient="records"):
-            old_hyperparameters = {
-                "n_estimators": int(row["n_estimators"]),
-                "max_depth": (
-                    None
-                    if pd.isna(row["max_depth"])
-                    else int(row["max_depth"])
-                ),
-            }
-
-            preserved_rows.append(
-                {
-                    "experiment_id": row["experiment_id"],
-                    "timestamp": row["timestamp"],
-                    "model_version": row["model_version"],
-                    "algorithm": "RandomForestRegressor",
-                    "hyperparameters": json.dumps(
-                        old_hyperparameters,
-                        sort_keys=True,
-                    ),
-                    "random_state": int(row["random_state"]),
-                    "test_size": TEST_SIZE,
-                    "MAE": row["MAE"],
-                    "RMSE": row["RMSE"],
-                    "R2": row["R2"],
-                }
-            )
-
-        previous_log = pd.DataFrame(preserved_rows, columns=log_columns)
-    else:
-        previous_log = previous_log.reindex(columns=log_columns)
+    previous_log = previous_log.reindex(columns=log_columns)
 else:
     previous_log = pd.DataFrame(columns=log_columns)
 
-new_experiment = {
-    "experiment_id": experiment_id,
-    "timestamp": timestamp,
-    "model_version": model_version,
+timestamp_rf = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+
+new_experiment_lr = {
+    "experiment_id": experiment_id_lr,
+    "timestamp": timestamp_lr,
+    "model_version": model_version_lr,
     "algorithm": "LinearRegression",
-    "hyperparameters": json.dumps(best_params, sort_keys=True),
+    "hyperparameters": json.dumps(best_params_lr, sort_keys=True),
     "random_state": RANDOM_STATE,
     "test_size": TEST_SIZE,
-    "MAE": mae,
-    "RMSE": rmse,
-    "R2": r2,
+    "MAE": mae_lr,
+    "RMSE": rmse_lr,
+    "R2": r2_lr,
 }
 
-updated_log = pd.concat(
-    [previous_log, pd.DataFrame([new_experiment], columns=log_columns)],
-    ignore_index=True,
-)
-updated_log.to_csv(LOG_PATH, index=False, encoding="utf-8")
+new_experiment_rf = {
+    "experiment_id": "exp_optuna_v2",
+    "timestamp": timestamp_rf,
+    "model_version": "model_v2",
+    "algorithm": "RandomForestRegressor",
+    "hyperparameters": json.dumps(best_params_rf, sort_keys=True),
+    "random_state": RANDOM_STATE,
+    "test_size": TEST_SIZE,
+    "MAE": mae_rf,
+    "RMSE": rmse_rf,
+    "R2": r2_rf,
+}
 
-print(f"Mejor configuración según validación cruzada: {best_params}")
-print(f"MAE en test: {mae:.4f}")
-print(f"RMSE en test: {rmse:.4f}")
-print(f"R² en test: {r2:.4f}")
-print(f"Modelo guardado en: {MODEL_PATH}")
-print(f"Métricas guardadas en: {METRICS_PATH}")
-print(f"Experimentos registrados en: {LOG_PATH}")
+new_experiments_df = pd.DataFrame([new_experiment_lr, new_experiment_rf], columns=log_columns)
+updated_log = pd.concat([previous_log, new_experiments_df], ignore_index=True)
+updated_log.to_csv(LOG_PATH, index=False, encoding="utf-8")
