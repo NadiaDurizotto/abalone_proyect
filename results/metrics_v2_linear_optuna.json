@@ -1,0 +1,20 @@
+{
+  "experiment_id": "exp_linear_optuna_20261025_115542",
+  "timestamp": "2026-10-25T11:55:42-03:00",
+  "model_version": "model_v2_linear_optuna",
+  "algorithm": "LinearRegression",
+  "target": "Age",
+  "random_state": 42,
+  "test_size": 0.3,
+  "cv_folds": 5,
+  "optuna_trials": 2,
+  "best_cv_mae": 1.6026226308072289,
+  "hyperparameters": {
+    "fit_intercept": true
+  },
+  "metrics": {
+    "MAE": 1.583237738943726,
+    "RMSE": 2.1874159738397028,
+    "R2": 0.5288038218248536
+  }
+}
