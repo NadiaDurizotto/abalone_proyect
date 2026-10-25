@@ -1,0 +1,12 @@
+{
+    "hyperparameters": {
+        "n_neighbors": 15,
+        "weights": "distance",
+        "p": 2
+    },
+    "metrics": {
+        "MAE": 1.5433926004212681,
+        "RMSE": 2.2071597344588936,
+        "R2": 0.5202593380718844
+    }
+}
