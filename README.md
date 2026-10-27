@@ -3,7 +3,7 @@
 Repositorio para el desarrollo del trabajo práctico de Laboratorio de Datos, enfocado en la utilizacion de git en la creacion de proyectos.
 
 ## Estructura del Proyecto
-
+```
 abalone_project/
 ├── data/
 │   ├── raw/
@@ -20,24 +20,30 @@ abalone_project/
 ├── requirements.txt
 ├── carga_dataset.py
 └── README.md
-
+```
 
 ## Instrucciones para ejecutar el preprocesamiento
 
 ### Preparar el entorno
 
 Desde la raíz del proyecto, en Windows PowerShell:
- conda create -n abalone python=3.11 pip -y
+```
+conda create -n abalone python=3.11 pip -y
 conda activate abalone
 python -m pip install -r requirements.txt
+```
 
 ### Ejecutar el proyecto
 
 Ejecutá estos comandos desde la raíz del proyecto:
+```
 python src/preprocess.py
 python src/train_model.py
+```
 El preprocesamiento lee data/raw/abalone_raw.csv y genera data/processed/abalone_clean.csv.
+
 El entrenamiento genera los modelos y las métricas de las variantes incluidas en src/train_model.py. Los modelos se guardan en models/, las métricas en results/ y cada ejecución se agrega a results/experiments_log.csv.
+
 Al repetir el entrenamiento, los archivos de modelos y métricas pueden actualizarse, y se agrega una nueva fila al registro de experimentos.
 
 
